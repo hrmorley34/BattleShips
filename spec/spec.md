@@ -11,15 +11,15 @@
     * Use arrows to switch between options?
 2. (option play new game ->) Show blank grid
     * Use standard grid subroutine
-    a. Prompt player for boat coordinates
+    1. Prompt player for boat coordinates
         * Use arrow keys to move (ext: and 'r' to rotate) the boat around the grid
         * Display boat preview
         * Use enter to confirm location of boat
         * Use backspace to go back to the previous boat?
-    b. Check for existing boat in that position
+    2. Check for existing boat in that position
         * Display boat in red on preview
-    c. Display each boat on grid after entry
-    d. Only allow the player to enter five boat locations
+    3. Display each boat on grid after entry
+    4. Only allow the player to enter five boat locations
         * Have an array of 5 boats
 3. (->) The computer randomly selects boat locations
     * Randomly generate coordinates
@@ -29,30 +29,30 @@
     * Use standart target tracker grid subroutine
     * May use same 2D array for target tracker and boat, but display different data
 5. Player takes their turn
-    a. Show user the grid
+    1. Show user the grid
         * In colour
-    b. Prompt for target coordinates
+    2. Prompt for target coordinates
         * Use Console.ReadKey to restrict what can be entered
         * Turn coordinates red if they have been hit before, and don't allow shooting then
         * Press enter to shoot
-    c. Check for hit or miss
+    3. Check for hit or miss
         * Show "H" for hit
             * Colour in green
         * Show "M" for miss
             * Colour in blue for water
-    d. Check for win (7.)
-    e. (ext: Save at end of turn (8.))
+    4. Check for win (7.)
+    5. (ext: Save at end of turn (8.))
 6. Computer takes its turn
-    a. Randomly generate target coordinates
+    1. Randomly generate target coordinates
         * If they have already been shot, re-generate
-    b. Display attack coordinates to the player
-    c. Check for hit or miss
+    2. Display attack coordinates to the player
+    3. Check for hit or miss
         * Show "H" for hit (over "B" of boat) on grid
             * Colour in red
         * Show "M" for miss
             * Colour in dark grey, so it isn't too obvious (not necessary for the user to know)
-    d. Check for win (7.)
-    e. (ext: Save at end of turn (8.))
+    4. Check for win (7.)
+    5. (ext: Save at end of turn (8.))
 7. Keep playing until there is a winner
     * Check if all boats have been hit
     * Display winner to player
