@@ -84,7 +84,13 @@ namespace BattleShips
             {
                 MainStep();
             }
+
             Serialiser?.Clear();
+
+            foreach (IPlayer player in Players)
+            {
+                player.ShowWinState(Players.Where(p => p.HasLost()).First());
+            }
         }
 
         public void Save()

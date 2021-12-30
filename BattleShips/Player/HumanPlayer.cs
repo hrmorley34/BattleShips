@@ -92,8 +92,8 @@ namespace BattleShips.Player
             if (CurrentIsVertical) halfLength = -halfLength;
 
             Coordinates coordinates = new Coordinates(
-                CurrentCoordinates.X - halfLength,
-                CurrentCoordinates.Y + halfLength);
+                CurrentCoordinates.X + halfLength,
+                CurrentCoordinates.Y - halfLength);
             CurrentIsVertical = !CurrentIsVertical;
 
             SetCurrent(coordinates);
@@ -465,6 +465,8 @@ namespace BattleShips.Player
             bool won = loser != this;
             Console.Clear();
             Colours.RenderWinText(won).Print();
+
+            Console.ReadKey(true);
         }
     }
 }

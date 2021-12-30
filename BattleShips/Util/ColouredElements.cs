@@ -68,7 +68,7 @@ namespace BattleShips.Util
             else
             {
                 return
-                    "hitting"
+                    "hitting "
                     + ColoredTextImage.Text("water", BadPair)
                     + ".";
             }
@@ -106,8 +106,22 @@ namespace BattleShips.Util
             : GetOwnHitMissText(d);
 
         public static ColoredTextImage RenderWinText(bool won)
-            => won
-            ? ColoredTextImage.Text("You win!", GoodPair)
-            : ColoredTextImage.Text("You lose!", BadPair);
+        {
+            const int width = 40;
+            ColoredTextImage image = new ColoredTextImage(width, 9);
+            if (won)
+                image = image
+                    .Overlay(ColoredTextImage.Text("Congratulations!", GoodPair), (width / 2 - 8, 2))
+                    .Overlay(ColoredTextImage.Text("You win!", GoodPair), (width / 2 - 4, 4));
+            else
+                image = image
+                    .Overlay(ColoredTextImage.Text("You lose!", BadPair), (width / 2 - 4, 4));
+            image = image
+                .Overlay(ColoredTextImage.Text(
+                        "Press any key to continue",
+                        new ConsoleColorPair(ConsoleColor.DarkGray)),
+                    (width / 2 - 12, 7));
+            return image;
+        }
     }
 }
