@@ -6,11 +6,52 @@ using ConsoleUtils.ConsoleKeyInteractions;
 
 namespace BattleShips
 {
+    /// <summary>Represents a possible boat lengths setting</summary>
+    public enum BoatLengthSetting
+    {
+        Normal,
+        Extension,
+    }
+
+    /// <summary>An object for holding/changing a <c>BoatLengthSetting</c></summary>
+    public class Settings
+    {
+        public static BoatLengthSetting[] SettingsOrder = { BoatLengthSetting.Normal, BoatLengthSetting.Extension };
+        public static Dictionary<BoatLengthSetting, int[]> BoatLengthsArrays = new Dictionary<BoatLengthSetting, int[]>
+        {
+            {BoatLengthSetting.Normal, new int[5] { 1, 1, 1, 1, 1 }},
+            {BoatLengthSetting.Extension, new int[5] { 1, 1, 2, 2, 3 }},
+        };
+        public static Dictionary<BoatLengthSetting, string> LengthNames = new Dictionary<BoatLengthSetting, string>
+        {
+            {BoatLengthSetting.Normal, "Normal (5x1)"},
+            {BoatLengthSetting.Extension, "Extension (2x1 2x2 1x3)"},
+        };
+
+        protected int _CurrentSettingId = 0;
+        public int CurrentSettingId
+        {
+            get => _CurrentSettingId;
+            // if goes out of range, wrap around
+            set => _CurrentSettingId = ((value % SettingsOrder.Length) + SettingsOrder.Length) % SettingsOrder.Length;
+        }
+        public BoatLengthSetting CurrentSetting
+        {
+            get => SettingsOrder[_CurrentSettingId];
+            set => _CurrentSettingId = Array.IndexOf(SettingsOrder, value);
+        }
+
+        public string CurrentLengthName { get => LengthNames[CurrentSetting]; }
+        public int[] CurrentLengths { get => BoatLengthsArrays[CurrentSetting]; }
+    }
+
+    /// <summary>Represents possible menu options</summary>
     public enum MenuOption
     {
         BeginNew = 1,
         Continue = 2,
         Instructions = 3,
+        Settings = 4,
         Exit = 0,
     }
 
@@ -31,14 +72,18 @@ namespace BattleShips
         }
         protected MenuOption FinalOption;
 
+        public readonly Serialiser<Game> Serialiser;
+        public readonly Settings Settings;
+
         /// <summary>The menu options, in order</summary>
-        public static readonly MenuOption[] OptionArray = { MenuOption.BeginNew, MenuOption.Continue, MenuOption.Instructions, MenuOption.Exit };
+        public static readonly MenuOption[] OptionArray = { MenuOption.BeginNew, MenuOption.Continue, MenuOption.Instructions, MenuOption.Settings, MenuOption.Exit };
         /// <summary>Number keys to select an option</summary>
         public static readonly Dictionary<ConsoleKey, MenuOption> OptionKeys = new Dictionary<ConsoleKey, MenuOption>
         {
             {ConsoleKey.D1, MenuOption.BeginNew}, /* {ConsoleKey.NumPad1, MenuOption.BeginNew}, */
             {ConsoleKey.D2, MenuOption.Continue}, /* {ConsoleKey.NumPad2, MenuOption.Continue}, */
             {ConsoleKey.D3, MenuOption.Instructions}, /* {ConsoleKey.NumPad3, MenuOption.Instructions}, */
+            {ConsoleKey.D4, MenuOption.Settings}, /* {ConsoleKey.NumPad4, MenuOption.Config}, */
             {ConsoleKey.D0, MenuOption.Exit}, /* {ConsoleKey.NumPad0, MenuOption.Exit}, */
         };
         /// <summary>Number characters to select an option</summary>
@@ -47,6 +92,7 @@ namespace BattleShips
             {'1', MenuOption.BeginNew},
             {'2', MenuOption.Continue},
             {'3', MenuOption.Instructions},
+            {'4', MenuOption.Settings},
             {'0', MenuOption.Exit},
         };
         /// <summary>X position of menu options</summary>
@@ -57,7 +103,8 @@ namespace BattleShips
             {MenuOption.BeginNew, 1},
             {MenuOption.Continue, 2},
             {MenuOption.Instructions, 3},
-            {MenuOption.Exit, 5},
+            {MenuOption.Settings, 4},
+            {MenuOption.Exit, 6},
         };
         /// <summary>Keys to move up the menu</summary>
         public static readonly ConsoleKey[] UpArrows = { ConsoleKey.LeftArrow, ConsoleKey.UpArrow, ConsoleKey.A, ConsoleKey.W };
@@ -66,34 +113,60 @@ namespace BattleShips
         /// <summary>Keys to finish selecting (by arrows)</summary>
         public static readonly ConsoleKey[] EnterKeys = { ConsoleKey.Enter, ConsoleKey.Spacebar };
 
-        /// <summary>Colours of menu options</summary>
-        public static readonly Dictionary<MenuOption, ConsoleColorPair> MenuColours = new Dictionary<MenuOption, ConsoleColorPair>
+        /// <summary>Get colours of menu options</summary>
+        public ConsoleColorPair? GetMenuOptionColour(MenuOption option)
         {
-            {MenuOption.BeginNew, new ConsoleColorPair(ConsoleColor.Green)},
-            {MenuOption.Continue, new ConsoleColorPair(ConsoleColor.Yellow)},
-            {MenuOption.Instructions, new ConsoleColorPair(ConsoleColor.Cyan)},
-            {MenuOption.Exit, new ConsoleColorPair(ConsoleColor.Red)},
-        };
-        /// <summary>Text (and colour) of menu options</summary>
-        public static readonly Dictionary<MenuOption, ColoredTextImage> MenuTexts = new Dictionary<MenuOption, ColoredTextImage>
+            switch (option)
+            {
+                case MenuOption.BeginNew:
+                    return new ConsoleColorPair(ConsoleColor.Green);
+                case MenuOption.Continue:
+                    return new ConsoleColorPair(Serialiser.FileExists() ? ConsoleColor.Yellow : ConsoleColor.DarkGray);
+                case MenuOption.Instructions:
+                    return new ConsoleColorPair(ConsoleColor.Cyan);
+                case MenuOption.Settings:
+                    return new ConsoleColorPair(ConsoleColor.Magenta);
+                case MenuOption.Exit:
+                    return new ConsoleColorPair(ConsoleColor.Red);
+            }
+            return null;
+        }
+
+        /// <summary>Get coloured text of menu options</summary>
+        public ColoredTextImage GetMenuOptionText(MenuOption option)
         {
-            {MenuOption.BeginNew, ColoredTextImage.Text("1. New game", MenuColours[MenuOption.BeginNew])},
-            {MenuOption.Continue, ColoredTextImage.Text("2. Resume game", MenuColours[MenuOption.Continue])},
-            {MenuOption.Instructions, ColoredTextImage.Text("3. Instructions", MenuColours[MenuOption.Instructions])},
-            {MenuOption.Exit, ColoredTextImage.Text("0. Exit", MenuColours[MenuOption.Exit])},
-        };
+            string text = "UNKNOWN OPTION";
+            switch (option)
+            {
+                case MenuOption.BeginNew:
+                    text = "1. New game"; break;
+                case MenuOption.Continue:
+                    text = "2. Resume game"; break;
+                case MenuOption.Instructions:
+                    text = "3. Instructions"; break;
+                case MenuOption.Settings:
+                    text = "4. Mode: " + Settings.CurrentLengthName; break;
+                case MenuOption.Exit:
+                    text = "0. Exit"; break;
+            }
+            return ColoredTextImage.Text(text, GetMenuOptionColour(option));
+        }
+
+        public Menu(Serialiser<Game> serialiser, Settings settings)
+        {
+            Serialiser = serialiser;
+            Settings = settings;
+        }
 
         /// <summary>Put together all parts of the menu as one block of text</summary>
         public ColoredTextImage GetMenu()
         {
-
-            ColoredTextImage image = new ColoredTextImage(30, 7);
-            foreach ((MenuOption m, ColoredTextImage t) in MenuTexts)
+            ColoredTextImage image = new ColoredTextImage(40, 8);
+            foreach ((MenuOption m, int y) in OptionYLocations)
             {
-                int y = OptionYLocations[m];
-                image = image.Overlay(t, (OptionXLocation, y));
+                image = image.Overlay(GetMenuOptionText(m), (OptionXLocation, y));
                 if (SelectedMenuOption == m)
-                    image = image.Overlay(ColoredTextImage.Text(">", MenuColours[m]), (OptionXLocation - 2, y));
+                    image = image.Overlay(ColoredTextImage.Text(">", GetMenuOptionColour(m)), (OptionXLocation - 2, y));
             }
             return image;
         }
