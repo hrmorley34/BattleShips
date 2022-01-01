@@ -9,6 +9,7 @@ namespace BattleShips
 {
     class Program
     {
+        static readonly InstructionDataToken InstructionTokenResetColour = InstructionDataToken.ColourToken();
         static readonly InstructionPager Instructions = new InstructionPager(new IEnumerable<InstructionDataToken>[] {
             new InstructionDataToken[] {
                 InstructionDataToken.ColourToken(ConsoleColor.Cyan),
@@ -18,9 +19,23 @@ namespace BattleShips
                 InstructionDataToken.ColourToken(ConsoleColor.Cyan),
                 InstructionDataToken.TextToken("============"),
             },
-            new InstructionDataToken[] { InstructionDataToken.ColourToken() },
-            InstructionDataToken.ParseStringLine("Example text goes here. I should put something here."),
-            InstructionDataToken.ParseStringLine("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
+            new InstructionDataToken[] { InstructionTokenResetColour },
+            InstructionDataToken.ParseStringLine("To play, select new game."),
+            InstructionDataToken.ParseStringLine("You will be asked to enter your boats. Use the arrow keys or type in coordinates, and press enter or space to submit."),
+            new InstructionDataToken[0],
+            InstructionDataToken.ParseStringLine("In the main game, you will be asked where to shoot. Again, use the arrow keys or type in coordinates, and press enter or space to shoot."),
+            InstructionDataToken.ParseStringLine("The game will tell you whether or not you hit anything, and whether you sunk a ship."),
+            InstructionDataToken.ParseStringLine("The aim of the game is to sink all of your enemy's ships, and you lose when you have no ships left afloat."),
+            new InstructionDataToken[0],
+            InstructionDataToken.ParseStringLine("If you accidentally leave a game part way through, the game autosaves and you can use the Resume option on the main menu to continue where you left off."),
+            new InstructionDataToken[0],
+            InstructionDataToken.ParseStringLine("You can also switch between playing with 5 destroyers of length 1, or 2 destroyers (length 1), 2 submarines (length 2), and a carrier (length 3)."),
+            new InstructionDataToken[0],
+            new InstructionDataToken[] { InstructionDataToken.ColourToken(ConsoleColor.Cyan) }
+                .Concat(InstructionDataToken.ParseStringLine("Have fun!")),
+            new InstructionDataToken[] { InstructionTokenResetColour },
+            new InstructionDataToken[] { InstructionDataToken.ColourToken(ConsoleColor.DarkGray) }
+                .Concat(InstructionDataToken.ParseStringLine("Press any key to return to the menu")),
         });
 
         static void Main(string[] args)
