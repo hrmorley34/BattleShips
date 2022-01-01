@@ -9,8 +9,10 @@ using ConsoleUtils.ConsoleKeyInteractions;
 
 namespace BattleShips.Player
 {
+    /// <summary>Key handler for placing the boats on the board</summary>
     public class BoatsInput : IKeyHandler<IEnumerable<(Coordinates, bool)>>
     {
+        /// <summary>Keys for moving the boat around</summary>
         public static readonly Dictionary<ConsoleKey, Vector> MoveDirectionKeys = new Dictionary<ConsoleKey, Vector>
         {
             {ConsoleKey.UpArrow, new Vector(0, -1)},
@@ -18,16 +20,19 @@ namespace BattleShips.Player
             {ConsoleKey.DownArrow, new Vector(0, 1)},
             {ConsoleKey.RightArrow, new Vector(1, 0)},
         };
+        /// <summary>Keys for rotating the boat</summary>
         public static readonly HashSet<ConsoleKey> RotateKeys = new HashSet<ConsoleKey>
         {
             ConsoleKey.R,
             ConsoleKey.Tab,
         };
+        /// <summary>Keys for placing the current boat and moving to the next one</summary>
         public static readonly HashSet<ConsoleKey> NextKeys = new HashSet<ConsoleKey>
         {
             ConsoleKey.Enter,
             ConsoleKey.Spacebar,
         };
+        /// <summary>Keys for going back to moving the previous boat</summary>
         public static readonly HashSet<ConsoleKey> BackKeys = new HashSet<ConsoleKey>
         {
             ConsoleKey.Backspace,
@@ -99,6 +104,7 @@ namespace BattleShips.Player
             SetCurrent(coordinates);
         }
 
+        /// <summary>Get all coordinates occupied by placed boats</summary>
         protected HashSet<Coordinates> GetOccupied()
         {
             HashSet<Coordinates> occupied = new HashSet<Coordinates>();
@@ -112,6 +118,7 @@ namespace BattleShips.Player
             return occupied;
         }
 
+        /// <summary>Is the current position valid</summary>
         protected bool IsValid()
         {
             HashSet<Coordinates> occupied = GetOccupied();
@@ -123,6 +130,7 @@ namespace BattleShips.Player
             return true;
         }
 
+        /// <summary>Iterate over the coordinates covered by the given boat</summary>
         public static IEnumerable<(int, Coordinates)> IterCoordinates(Coordinates coordinates, bool isVertical, int length)
         {
             for (int index = 0; index < length; index++)
@@ -132,6 +140,7 @@ namespace BattleShips.Player
                     isVertical ? coordinates.Y + index : coordinates.Y));
             }
         }
+        /// <summary>Iterate over the elements of the boat and their coordinates</summary>
         public static IEnumerable<(Coordinates, BoatElement)> IterCoordinates(Coordinates coordinates, bool isVertical, Boat boat)
         {
             foreach ((int index, Coordinates partCoordinates) in BoatsInput.IterCoordinates(coordinates, isVertical, boat.BoatElements.Length))
@@ -139,6 +148,7 @@ namespace BattleShips.Player
                 yield return (partCoordinates, boat.BoatElements[index]);
             }
         }
+        /// <summary>Iterate over the coordinates covered by the current boat</summary>
         protected IEnumerable<(int, Coordinates)> IterCurrentCoordinates()
         {
             if (BoatIndex < BoatLengths.Length)
@@ -146,6 +156,7 @@ namespace BattleShips.Player
             return new (int, Coordinates)[0];
         }
 
+        /// <summary>Render the current and already placed boats on the board</summary>
         public ColoredTextImage RenderCurrent(int xPad = Board.RenderXPad, int yPad = Board.RenderYPad)
         {
             ColoredTextImage boardImage = Board.Render(enemy: false, xPad: xPad, yPad: yPad);
@@ -154,6 +165,7 @@ namespace BattleShips.Player
 
             foreach (Coordinates coords in occupied)
             {
+                // print boats in all occupied cells
                 boardImage = boardImage.Overlay(
                     ColoredTextImage.Text("B", new ConsoleColorPair(ConsoleColor.Cyan)),
                     Board.GetRenderCoordinates(coords, xPad: xPad, yPad: yPad));
@@ -161,6 +173,7 @@ namespace BattleShips.Player
 
             foreach ((int _, Coordinates coords) in current)
             {
+                // if the current boat overlaps, print in red; otherwise green
                 ConsoleColorPair colour = new ConsoleColorPair(
                     occupied.Contains(coords) ? ConsoleColor.Red : ConsoleColor.Green);
                 boardImage = boardImage.Overlay(
@@ -179,6 +192,7 @@ namespace BattleShips.Player
                 .Overlay(boardImage, (0, 0))
                 .Overlay(coordsText, (0, boardImage.YSize));
         }
+        /// <summary>Print the current state</summary>
         public void PrintCurrent(int xPad = Board.RenderXPad, int yPad = Board.RenderYPad)
         {
             Console.Clear();
@@ -201,6 +215,7 @@ namespace BattleShips.Player
             {
                 if (IsValid())
                 {
+                    // only submit boat if no cells overlap
                     BoatIndex++;
                     Values.Add((CurrentCoordinates, CurrentIsVertical));
                     ResetCurrent();
@@ -210,7 +225,9 @@ namespace BattleShips.Player
             {
                 if (BoatIndex > 0)
                 {
+                    // move back to the previous boat
                     BoatIndex--;
+                    // set the current positions to where the last boat was
                     (CurrentCoordinates, CurrentIsVertical) = Values.Last();
                     Values.RemoveAt(Values.Count() - 1);
                 }
@@ -250,11 +267,16 @@ namespace BattleShips.Player
         public bool Finished() => BoatIndex >= BoatLengths.Length;
         public IEnumerable<(Coordinates, bool)> GetReturnValue() => Values;
 
-        public IEnumerable<(Coordinates, bool)> ReadKeys() => ReadKeysMethod.ReadKeys(this);
+        public IEnumerable<(Coordinates, bool)> ReadKeys()
+        {
+            PrintCurrent();
+            return ReadKeysMethod.ReadKeys(this);
+        }
     }
 
     public class ShotInput : IKeyHandler<Coordinates>
     {
+        /// <summary>Keys for moving the shot around</summary>
         public static readonly Dictionary<ConsoleKey, Vector> MoveDirectionKeys = new Dictionary<ConsoleKey, Vector>
         {
             {ConsoleKey.UpArrow, new Vector(0, -1)},
@@ -262,6 +284,7 @@ namespace BattleShips.Player
             {ConsoleKey.DownArrow, new Vector(0, 1)},
             {ConsoleKey.RightArrow, new Vector(1, 0)},
         };
+        /// <summary>Keys for confirming the shot</summary>
         public static readonly HashSet<ConsoleKey> ConfirmKeys = new HashSet<ConsoleKey>
         {
             ConsoleKey.Enter,
@@ -301,9 +324,11 @@ namespace BattleShips.Player
             Coordinates = new Coordinates(x: Coordinates.X, y: y);
         }
 
+        /// <summary>Are the current coordinates valid?</summary>
         protected bool IsValid()
             => !Board.Get(Coordinates).HasShot();
 
+        /// <summary>Render the board with the selected coordinates</summary>
         public ColoredTextImage RenderCurrent(int xPad = Board.RenderXPad, int yPad = Board.RenderYPad)
         {
             ConsoleColorPair colour = new ConsoleColorPair(IsValid() ? ConsoleColor.Green : ConsoleColor.Red);
@@ -322,6 +347,7 @@ namespace BattleShips.Player
                 .Overlay(boardImage, (0, 0))
                 .Overlay(coordsText, (0, gridMaxY));
         }
+        /// <summary>Print the current state</summary>
         public void PrintCurrent(int xPad = Board.RenderXPad, int yPad = Board.RenderYPad)
         {
             Console.Clear();
@@ -373,9 +399,14 @@ namespace BattleShips.Player
         public bool Finished() => HasFinished;
         public Coordinates GetReturnValue() => Coordinates;
 
-        public Coordinates ReadKeys() => ReadKeysMethod.ReadKeys(this);
+        public Coordinates ReadKeys()
+        {
+            PrintCurrent();
+            return ReadKeysMethod.ReadKeys(this);
+        }
     }
 
+    /// <summary>Object representing a human player at the console</summary>
     [DataContract(IsReference = true)]
     public class HumanPlayer : IPlayer
     {
@@ -399,6 +430,10 @@ namespace BattleShips.Player
         public Board GetOwnBoard() => BoatsBoard ?? throw new NullReferenceException();
         public Board GetEnemyBoard() => EnemyBoard ?? throw new NullReferenceException();
 
+        /// <summary>
+        /// Get whether the board is enemy board
+        /// </summary>
+        /// <returns><c>false</c> for own board, <c>true</c> for enemy board, and <c>null</c> otherwise</returns>
         protected bool? IsBoardEnemy(Board board)
             => board == GetOwnBoard() ? false : board == GetEnemyBoard() ? true : null;
 
@@ -440,7 +475,6 @@ namespace BattleShips.Player
             Boats = boats.ToArray();
 
             BoatsInput boatsInput = new BoatsInput(Boats.Select(b => b.BoatElements.Length).ToArray(), board);
-            boatsInput.PrintCurrent();
             var positions = boatsInput.ReadKeys();
 
             foreach ((Boat b, (Coordinates coordinates, bool isVertical)) in Boats.Zip(positions))
@@ -456,7 +490,6 @@ namespace BattleShips.Player
         {
             Board board = GetEnemyBoard();
             ShotInput input = new ShotInput(board);
-            input.PrintCurrent();
             return input.ReadKeys();
         }
 

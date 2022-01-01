@@ -22,7 +22,7 @@ namespace BattleShips
         public bool Shoot()
         {
             Shot = true;
-            return false;
+            return true;
         }
 
         public bool HasShot() => Shot;
@@ -47,6 +47,7 @@ namespace BattleShips
             BoatElements = new BoatElement[] { new BoatElement(this) };
         }
 
+        /// <summary>Create a boat with a length</summary>
         public Boat(int length)
         {
             BoatElements = new BoatElement[length];
@@ -56,6 +57,7 @@ namespace BattleShips
             }
         }
 
+        /// <summary>Have all parts of the boat been hit?</summary>
         public bool IsSunk() => BoatElements.All(b => b.HasShot());
     }
 }

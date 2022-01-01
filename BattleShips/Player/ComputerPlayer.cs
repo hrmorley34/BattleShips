@@ -53,17 +53,21 @@ namespace BattleShips.Player
             HashSet<(int, int)> UsedCells;
             do
             {
+                // start with no used cells and no placements
                 UsedCells = new HashSet<(int, int)>();
                 Placements = new (BoatElement, (int, int))[0];
                 validPlacement = true;
 
                 foreach (Boat b in Boats)
                 {
+                    // generate random orientation
                     bool isVertical = Random.Next(2) == 1;
+                    // work out where the boat can go
                     int maxX = board.XSize, maxY = board.YSize;
                     if (isVertical) maxY -= b.BoatElements.Length - 1;
                     else maxX -= b.BoatElements.Length - 1;
 
+                    // generate random coordinates
                     int x = Random.Next(0, maxX), y = Random.Next(0, maxY);
 
                     IEnumerable<(BoatElement, (int, int))> IterElements()
@@ -79,6 +83,7 @@ namespace BattleShips.Player
                     {
                         if (UsedCells.Contains(coords))
                         {
+                            // if this boat overlaps with any existing ones, restart
                             validPlacement = false;
                             break;
                         }
@@ -88,9 +93,9 @@ namespace BattleShips.Player
 
                     Placements = Placements.Concat(IterElements());
                 }
-            } while (!validPlacement);
+            } while (!validPlacement); // keep generating positions until a valid one is found
 
-            // Write boat positions to the board
+            // Write final boat positions to the board
             foreach ((BoatElement element, (int, int) coords) in Placements)
             {
                 board.Set(coords, element);
@@ -105,6 +110,7 @@ namespace BattleShips.Player
             Coordinates coordinates;
             do
             {
+                // generate coordinates, and check if they're valid
                 coordinates = new Coordinates(Random.Next(board.XSize), Random.Next(board.YSize));
                 validShot = !board.Get(coordinates).HasShot();
             } while (!validShot);

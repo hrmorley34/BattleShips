@@ -4,6 +4,7 @@ using ConsoleUtils.ConsoleImagery;
 
 namespace BattleShips.Boards
 {
+    /// <summary>The different values to display on a grid</summary>
     [Flags]
     public enum DisplayEnum
     {

@@ -3,6 +3,7 @@ using System.Linq;
 
 namespace BattleShips.Util
 {
+    /// <summary>Represents a 2D vector</summary>
     public class Vector : IEquatable<Vector>
     {
         public readonly int X;
@@ -51,6 +52,7 @@ namespace BattleShips.Util
         }
     }
 
+    /// <summary>Represents a 2D absolute position</summary>
     public class Coordinates : Vector
     {
         public Coordinates(int x, int y) : base(x, y) { }
@@ -65,8 +67,10 @@ namespace BattleShips.Util
         public static readonly Coordinates Origin = new Coordinates(0, 0);
     }
 
+    /// <summary>Converters for coordinates</summary>
     public static class CoordinatesLetterNumber
     {
+        /// <summary>Convert a column index into a letter (0 => A)</summary>
         public static string IntToAlphas(int i)
         {
             if (i < 0) throw new ArgumentException();
@@ -74,25 +78,39 @@ namespace BattleShips.Util
             return IntToAlphas((i / 26) - 1) + IntToAlphas(i % 26);
         }
 
+        /// <summary>Convert letters into a column index (A => 0, AA => 26)</summary>
         public static int AlphasToInt(string s)
             => s.Select(AlphaToInt).Aggregate((v, n) => (v + 1) * 26 + n);
 
+        /// <summary>Convert a letter into a column index (A => 0)</summary>
         public static int AlphaToInt(char c)
-            => (c - 'A');
+        {
+            if ('A' <= c && c <= 'Z')
+                return (c - 'A');
+            else if ('a' <= c && c <= 'z')
+                return (c - 'a');
+            else
+                throw new ArgumentException();
+        }
 
+        /// <summary>Check if a key can be converted into a column index</summary>
         public static bool ValidAlphaKey(ConsoleKey key)
             => key >= ConsoleKey.A && key <= ConsoleKey.Z;
+        /// <summary>Convert a letter key into a colum index (A => 0)</summary>
         public static int AlphaToInt(ConsoleKey key)
         {
             if (!ValidAlphaKey(key)) throw new ArgumentException();
             return key - ConsoleKey.A;
         }
 
+        /// <summary>Convert a row index into a row number (0 => 1)</summary>
         public static string IntToDigits(int i)
             => (i + 1).ToString();
 
+        /// <summary>Check if a key can be converted into a row index</summary>
         public static bool ValidDigitKey(ConsoleKey key)
             => key >= ConsoleKey.D0 && key <= ConsoleKey.D9;
+        /// <summary>Convert a number key into a row index (1 => 0)</summary>
         public static int DigitToInt(ConsoleKey key)
         {
             if (!ValidDigitKey(key)) throw new ArgumentException();
@@ -100,7 +118,8 @@ namespace BattleShips.Util
             return (key - ConsoleKey.D1);
         }
 
+        /// <summary>Convert coordinates into a letters-numbers pair</summary>
         public static string ToLetterNumber(this Coordinates coordinates)
-            => IntToAlphas(coordinates.X) + coordinates.Y.ToString();
+            => IntToAlphas(coordinates.X) + IntToDigits(coordinates.Y);
     }
 }

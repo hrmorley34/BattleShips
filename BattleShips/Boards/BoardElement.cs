@@ -3,10 +3,14 @@ using System.Runtime.Serialization;
 
 namespace BattleShips.Boards
 {
+    /// <summary>A generic element of a board</summary>
     public interface IBoardElement
     {
+        /// <summary>Shoot at this element</summary>
         bool Shoot();
+        /// <summary>Has this element yet been shot?</summary>
         bool HasShot();
+        /// <summary>Get the <c>DisplayEnum</c> of this element</summary>
         DisplayEnum GetDisplay();
     }
 

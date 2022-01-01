@@ -8,6 +8,7 @@ using BattleShips.Util;
 
 namespace BattleShips
 {
+    /// <summary>The main game object</summary>
     [DataContract(IsReference = true)]
     [KnownType(typeof(ComputerPlayer))]
     [KnownType(typeof(HumanPlayer))]
@@ -53,6 +54,7 @@ namespace BattleShips
             CurrentPlayerIndex = 0;
         }
 
+        /// <summary>Setup the game</summary>
         public void MainSetup(IEnumerable<int> BoatLengths)
         {
             foreach (IPlayer player in Players)
@@ -61,6 +63,7 @@ namespace BattleShips
             }
         }
 
+        /// <summary>Run one player turn</summary>
         public void MainStep()
         {
             IPlayer currentPlayer = CurrentPlayerObject;
@@ -78,13 +81,16 @@ namespace BattleShips
             }
         }
 
+        /// <summary>Run the main game loop</summary>
         public void MainLoop()
         {
             while (!Players.Any(p => p.HasLost()))
             {
+                // keep stepping until a player has lost
                 MainStep();
             }
 
+            // delete save file
             Serialiser?.Clear();
 
             foreach (IPlayer player in Players)
@@ -93,6 +99,7 @@ namespace BattleShips
             }
         }
 
+        /// <summary>Write the current state to the file (if available)</summary>
         public void Save()
         {
             Serialiser?.SerialiseObject(this);

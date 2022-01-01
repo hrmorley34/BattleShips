@@ -14,6 +14,7 @@ namespace BattleShips
         Exit = 0,
     }
 
+    /// <summary>Handler for displaying the menu, allowing the user to switch between options</summary>
     public class Menu : IKeyHandler<MenuOption>
     {
         protected bool HasFinished = false;
@@ -30,7 +31,9 @@ namespace BattleShips
         }
         protected MenuOption FinalOption;
 
+        /// <summary>The menu options, in order</summary>
         public static readonly MenuOption[] OptionArray = { MenuOption.BeginNew, MenuOption.Continue, MenuOption.Instructions, MenuOption.Exit };
+        /// <summary>Number keys to select an option</summary>
         public static readonly Dictionary<ConsoleKey, MenuOption> OptionKeys = new Dictionary<ConsoleKey, MenuOption>
         {
             {ConsoleKey.D1, MenuOption.BeginNew}, /* {ConsoleKey.NumPad1, MenuOption.BeginNew}, */
@@ -38,6 +41,7 @@ namespace BattleShips
             {ConsoleKey.D3, MenuOption.Instructions}, /* {ConsoleKey.NumPad3, MenuOption.Instructions}, */
             {ConsoleKey.D0, MenuOption.Exit}, /* {ConsoleKey.NumPad0, MenuOption.Exit}, */
         };
+        /// <summary>Number characters to select an option</summary>
         public static readonly Dictionary<char, MenuOption> OptionChars = new Dictionary<char, MenuOption>
         {
             {'1', MenuOption.BeginNew},
@@ -45,7 +49,9 @@ namespace BattleShips
             {'3', MenuOption.Instructions},
             {'0', MenuOption.Exit},
         };
+        /// <summary>X position of menu options</summary>
         public const int OptionXLocation = 3;
+        /// <summary>Y positions of menu options</summary>
         public static readonly Dictionary<MenuOption, int> OptionYLocations = new Dictionary<MenuOption, int>
         {
             {MenuOption.BeginNew, 1},
@@ -53,10 +59,14 @@ namespace BattleShips
             {MenuOption.Instructions, 3},
             {MenuOption.Exit, 5},
         };
+        /// <summary>Keys to move up the menu</summary>
         public static readonly ConsoleKey[] UpArrows = { ConsoleKey.LeftArrow, ConsoleKey.UpArrow, ConsoleKey.A, ConsoleKey.W };
+        /// <summary>Keys to move down the menu</summary>
         public static readonly ConsoleKey[] DownArrows = { ConsoleKey.RightArrow, ConsoleKey.DownArrow, ConsoleKey.D, ConsoleKey.S };
+        /// <summary>Keys to finish selecting (by arrows)</summary>
         public static readonly ConsoleKey[] EnterKeys = { ConsoleKey.Enter, ConsoleKey.Spacebar };
 
+        /// <summary>Colours of menu options</summary>
         public static readonly Dictionary<MenuOption, ConsoleColorPair> MenuColours = new Dictionary<MenuOption, ConsoleColorPair>
         {
             {MenuOption.BeginNew, new ConsoleColorPair(ConsoleColor.Green)},
@@ -64,6 +74,7 @@ namespace BattleShips
             {MenuOption.Instructions, new ConsoleColorPair(ConsoleColor.Cyan)},
             {MenuOption.Exit, new ConsoleColorPair(ConsoleColor.Red)},
         };
+        /// <summary>Text (and colour) of menu options</summary>
         public static readonly Dictionary<MenuOption, ColoredTextImage> MenuTexts = new Dictionary<MenuOption, ColoredTextImage>
         {
             {MenuOption.BeginNew, ColoredTextImage.Text("1. New game", MenuColours[MenuOption.BeginNew])},
@@ -72,6 +83,7 @@ namespace BattleShips
             {MenuOption.Exit, ColoredTextImage.Text("0. Exit", MenuColours[MenuOption.Exit])},
         };
 
+        /// <summary>Put together all parts of the menu as one block of text</summary>
         public ColoredTextImage GetMenu()
         {
 
@@ -86,6 +98,7 @@ namespace BattleShips
             return image;
         }
 
+        /// <summary>Print the menu out</summary>
         public void PrintMenu()
         {
             Console.SetCursorPosition(0, 0);
@@ -98,21 +111,25 @@ namespace BattleShips
 
             if (OptionKeys.ContainsKey(key.Key))
             {
+                // select an option and immediately finish
                 FinalOption = OptionKeys[key.Key];
                 HasFinished = true;
             }
             else if (UpArrows.Contains(key.Key))
             {
+                // go up an option, and re-print the menu
                 SelectedOption--;
                 PrintMenu();
             }
             else if (DownArrows.Contains(key.Key))
             {
+                // go down an option and re-print the menu
                 SelectedOption++;
                 PrintMenu();
             }
             else if (EnterKeys.Contains(key.Key))
             {
+                // finish with the current option
                 FinalOption = SelectedMenuOption;
                 HasFinished = true;
             }
@@ -129,7 +146,7 @@ namespace BattleShips
                 FinalOption = OptionChars[c];
                 HasFinished = true;
             }
-            SelectedOption++;
+
             return Finished();
         }
 
@@ -149,10 +166,14 @@ namespace BattleShips
         }
     }
 
+    /// <summary>Represents a part of a set of instructions</summary>
     public class InstructionDataToken
     {
+        /// <summary>The colour to switch to</summary>
         public ConsoleColorPair? Colour = null;
+        /// <summary>The text to represent</summary>
         public string? Text = null;
+        /// <summary>Whether or not this text needs to be included, e.g. at a newline</summary>
         public bool Breakable = false;
 
         public InstructionDataToken() { }
@@ -173,6 +194,7 @@ namespace BattleShips
         public string? GetText() => Text;
         public bool GetBreakable() => Breakable;
 
+        /// <summary>Split a line of text into alternating non-breakable and breakable tokens</summary>
         public static IEnumerable<InstructionDataToken> ParseStringLine(string line)
         {
             List<char> chars = new List<char>();
@@ -182,6 +204,8 @@ namespace BattleShips
             {
                 if (char.IsWhiteSpace(c) != LastWhitespace)
                 {
+                    // if the last one was whitespace and this one isn't (or vice versa)
+                    // return the last block of text, and start a new list of characters
                     data = new string(chars.ToArray());
                     if (LastWhitespace)
                         yield return WhitespaceToken(data);
@@ -217,6 +241,7 @@ namespace BattleShips
         }
     }
 
+    /// <summary>Object for printing out the instructions</summary>
     public class InstructionPager
     {
         public List<List<InstructionDataToken>> Lines;
@@ -248,6 +273,7 @@ namespace BattleShips
 
         public void Add(string text) => Add(InstructionDataToken.ParseString(text));
 
+        /// <summary>Group tokens by colour</summary>
         public static IEnumerable<(bool, ColoredTextImage)> GroupTokens(IEnumerable<InstructionDataToken> tokenRow)
         {
             if (tokenRow.Count() <= 0) yield break;
@@ -276,8 +302,10 @@ namespace BattleShips
                 yield return (lastBreakable, image);
         }
 
+        /// <summary>Group tokens into breakable and non-breakable images</summary>
         public static IEnumerable<(ColoredTextImage?, ColoredTextImage?)> GroupPairTokens(IEnumerable<InstructionDataToken> tokenRow)
             => GroupPairTokens(GroupTokens(tokenRow));
+        /// <summary>Group tokens into breakable and non-breakable images</summary>
         public static IEnumerable<(ColoredTextImage?, ColoredTextImage?)> GroupPairTokens(IEnumerable<(bool, ColoredTextImage)> groupedTokens)
         {
             ColoredTextImage? breakableImage = null, nonBreakableImage = null;
@@ -303,6 +331,7 @@ namespace BattleShips
                 yield return (breakableImage, nonBreakableImage);
         }
 
+        /// <summary>Wrap the lines of this object to a limited length</summary>
         public ColoredTextImage WrapLines(int width)
         {
             int currentColumn;
@@ -338,11 +367,13 @@ namespace BattleShips
                     int preCurrentColumn = currentColumn;
                     if (currentColumn + breakableArray.Length + nonBreakableArray.Length <= width)
                     {
+                        // if both elements will fit, just add them
                         AppendArray(breakableArray);
                         AppendArray(nonBreakableArray);
                     }
                     else if (nonBreakableArray.Length > width)
                     {
+                        // if the non-breakable is too long, split it by length
                         if (currentColumn + breakableArray.Length <= width)
                         {
                             AppendArray(breakableArray);
@@ -359,6 +390,7 @@ namespace BattleShips
                     }
                     else
                     {
+                        // if the non-breakable text doesn't fit, put it on a newline
                         if (currentColumn + breakableArray.Length <= width)
                         {
                             AppendArray(breakableArray);
@@ -371,6 +403,7 @@ namespace BattleShips
             return new ColoredTextImage(image);
         }
 
+        /// <summary>Print the instructions out</summary>
         public void Print(int xBorder = 1, int yBorder = 0)
         {
             int wrap = Console.WindowWidth - 2 * xBorder;
