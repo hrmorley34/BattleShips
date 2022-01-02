@@ -193,7 +193,7 @@ namespace BattleShips.Player
                 .Overlay(coordsText, (0, boardImage.YSize));
         }
         /// <summary>Print the current state</summary>
-        public void PrintCurrent(int xPad = Board.RenderXPad, int yPad = Board.RenderYPad)
+        public virtual void PrintCurrent(int xPad = Board.RenderXPad, int yPad = Board.RenderYPad)
         {
             Console.Clear();
             RenderCurrent(xPad: xPad, yPad: yPad).Print();
@@ -348,7 +348,7 @@ namespace BattleShips.Player
                 .Overlay(coordsText, (0, gridMaxY));
         }
         /// <summary>Print the current state</summary>
-        public void PrintCurrent(int xPad = Board.RenderXPad, int yPad = Board.RenderYPad)
+        public virtual void PrintCurrent(int xPad = Board.RenderXPad, int yPad = Board.RenderYPad)
         {
             Console.Clear();
             RenderCurrent(xPad: xPad, yPad: yPad).Print();

@@ -172,7 +172,7 @@ namespace BattleShips
         }
 
         /// <summary>Print the menu out</summary>
-        public void PrintMenu()
+        public virtual void PrintMenu()
         {
             Console.SetCursorPosition(0, 0);
             GetMenu().Print();
